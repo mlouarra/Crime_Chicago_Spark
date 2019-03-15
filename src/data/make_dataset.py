@@ -95,12 +95,14 @@ class LoadDataframe:
         for old_name, new_name in column_name['DataCrimes'].items():
             df_crimes = df_crimes.withColumnRenamed(old_name, new_name)
         df_crimes = df_crimes.withColumn("date", func.to_timestamp("date", "MM/dd/yyyy hh:mm:ss aaa"))
+        df_crimes = df_crimes.filter((func.col('date') > self._start_year) & (func.col('date') < self._end_year))
 
         if self._config["List_of_crimes_prediction"]["with_merge"]:
             df_crimes = df_crimes.na.replace(self._config["List_of_crimes_prediction"]["to_merge"], 'primary_type')
             return df_crimes
 
         else:
+
             return df_crimes
 
     def df_socio(self):
@@ -114,11 +116,6 @@ class LoadDataframe:
 
         for old_name, new_name in column_name['SocioEco'].items():
             df_socio = df_socio.withColumnRenamed(old_name, new_name)
-
-        # column_names_to_normalize = ['pct_housing_crowded', 'pct_households_below_poverty', 'pct_age16_unemployed',
-        #                              'pct_age25_no_highschool', 'pct_not_working_age', 'per_capita_income',
-        #                              'hardship_index']
-
         return df_socio
 
     def df_nb_crimes(self):
@@ -131,8 +128,7 @@ class LoadDataframe:
         df_S = self.df_socio()
         df_C = self.df_crime()
         df_C = df_C.filter(func.col('primary_type').isin(self._config['NameCrime']))
-        df_C = df_C.filter((func.col('date') > self._start_year) & (func.col('date') < self._end_year)).\
-            withColumn("month", func.month(func.col("date"))).\
+        df_C = df_C.withColumn("month", func.month(func.col("date"))).\
             withColumn("year", func.year(func.col("date"))).\
             groupBy('community_area_number', 'month', 'year', 'primary_type').\
             agg(func.count(df_C.id).alias('nb_crimes')).\
