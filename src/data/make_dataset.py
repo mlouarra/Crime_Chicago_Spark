@@ -6,6 +6,7 @@ import findspark
 findspark.init()
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as func
+from pyspark.sql.types import FloatType
 spark = SparkSession.builder.master("local").appName("Data cleaning").getOrCreate()
 pd.options.mode.chained_assignment = None
 
@@ -150,6 +151,7 @@ class LoadDataframe:
             withColumn("year", func.year(func.col("datetime"))).\
             withColumn("day",func.dayofmonth(func.col("datetime"))). \
             withColumn("hour", func.hour(func.col("datetime")))
+        df = df.withColumn('Temperature', df['Temperature'].cast(FloatType()))
         return df
 
     def df_sky(self):
