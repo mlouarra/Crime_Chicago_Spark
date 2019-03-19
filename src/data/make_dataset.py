@@ -109,6 +109,8 @@ class LoadDataframe:
     def df_socio(self):
         """
 
+
+
         :return:
         """
         column_name = json.loads(open(self.path_columns()).read())
