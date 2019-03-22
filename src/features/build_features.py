@@ -2,16 +2,14 @@
 import pandas as pd
 import datetime as dt
 from sklearn.preprocessing import LabelEncoder
-from pyspark.sql.types import DoubleType
-from astral import Astral
+from pyspark.sql.types import LongType, StringType, FloatType, IntegerType, DoubleType
+from pyspark.sql.functions import col, pandas_udf, udf
 import re
 
 class extract_features_classification:
+    """
 
-    city_name = 'Chicago'
-    a = Astral()
-    a.solar_depression = 'civil'
-    city = a[city_name]
+    """
 
     def __init__(self, config, df_crime_socio, df_temperature, df_sky):
         """
@@ -45,51 +43,36 @@ class extract_features_classification:
 
 
 
-    def duration_day(self, date):
-        """
 
+
+    def duration_day_func(x):
+        """
         :return:
         """
-
-        sun = self.city.sun(date=date, local=True)
-        return (sun['sunset'] - sun['sunrise']).total_seconds()
-
+        from astral import Astral
+        city_name = 'Chicago'
+        a = Astral()
+        a.solar_depression = 'civil'
+        city = a[city_name]
+        sun = city.sun(date=x, local=True)
+        return float((sun['sunset'] - sun['sunrise']).total_seconds())
 
     def extract_feature(self):
         """
         this function extract features for machine learning algorithm
         """
-        category = LabelEncoder()
-        pd.options.mode.chained_assignment = None
-        df_crime_socio = self._df_crime_socio[self._df_crime_socio.primary_type.isin(self.list_of_crimes())]
-        df_crime_socio['extract_block'] = df_crime_socio.block.apply(lambda x: re.findall(r"(\w+)$", x)[0])
-        df_crime_socio['isStreet'] = df_crime_socio.extract_block.apply(lambda x: self.isStreet(x))
-        df_crime_socio['isAV'] = df_crime_socio.extract_block.apply(lambda x: self.isAV(x))
-        df_crime_socio['isBLVD'] = df_crime_socio.extract_block.apply(lambda x: self.isBLVD(x))
-        df_crime_socio['isRD'] = df_crime_socio.extract_block.apply(lambda x: self.isRD(x))
-        df_crime_socio['isPL'] = df_crime_socio.extract_block.apply(lambda x: self.isPL(x))
-        df_crime_socio['isBROADWAY'] = df_crime_socio.extract_block.apply(lambda x: self.isBROADWAY(x))
-        df_crime_socio['isPKWY'] = df_crime_socio.extract_block.apply(lambda x: self.isPKWY(x))
-        df_crime_socio.drop("extract_block", inplace=True, axis=1)
-        df_crime_socio['duree_day'] = df_crime_socio['date'].apply(lambda x: self.duration_day(x))
-        df_crime_socio['month'] = df_crime_socio['date'].dt.month
-        df_crime_socio['day'] = df_crime_socio['date'].dt.day
-        df_crime_socio['hours'] = df_crime_socio['date'].dt.hour
-        df_crime_socio['minutes'] = df_crime_socio['date'].dt.minute
-        df_crime_socio['dayofweek'] = df_crime_socio['date'].apply(lambda x: dt.datetime.strftime(x, '%A'))
-        df_crime_socio['XY'] = df_crime_socio.x_coordinate * df_crime_socio.y_coordinate
-        df_crime_socio['Category'] = category.fit_transform(df_crime_socio.primary_type)
-        df = pd.get_dummies(df_crime_socio, columns=['dayofweek'])
-        # df_crime_socio_ml = pd.get_dummies(df, columns=['community_area_name', 'domestic'])
 
-        df_crime_socio_ml = pd.get_dummies(df, columns=['domestic'])
-        del df
-        del df_crime_socio
-        df_ml = pd.merge(df_crime_socio_ml, self._df_temperature, how='left', on=['month', 'day', 'hours'])
-        del df_crime_socio_ml
-        df_ml = pd.merge(df_ml, self._df_sky, how='left', on=['month', 'day', 'hours'])
-        df_ml.dropna(inplace=True)
-        return df_ml.drop(self.list_to_drop(), axis=1), list(category.classes_)
+        extract_blok = udf(lambda x: re.findall(r"(\w+)$", x)[0], StringType())
+        isStreet = udf(lambda x: 1 if x in ['ST', 'St', 'st'] else 0, IntegerType())
+        isAV = udf(lambda x: 1 if x in ['Ave', 'AV', 'AVE'] else 0, IntegerType())
+        isBLVD = udf(lambda x: 1 if x in ['BLVD'] else 0, IntegerType())
+        isRD = udf(lambda x: 1 if x in ['RD'] else 0, IntegerType())
+        isPL = udf(lambda x: 1 if x in ['PL', 'pl'] else 0, IntegerType())
+        isBROADWAY = udf(lambda x: 1 if x in ['BROADWAY', 'Broadway'] else 0, IntegerType())
+        isPKWY = udf(lambda x: 1 if x in ['PKWY', 'Pkwy'] else 0, IntegerType())
+        duration_day_udf = udf(lambda x: self.duration_day_func(x), FloatType())
+
+
 
 class  extract_features_regression():
 
