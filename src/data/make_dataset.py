@@ -119,7 +119,27 @@ class LoadDataframe:
 
         for old_name, new_name in column_name['SocioEco'].items():
             df_socio = df_socio.withColumnRenamed(old_name, new_name)
+
+        features_socio = ['pct_housing_crowded',
+                          'pct_households_below_poverty', 'pct_age16_unemployed',
+                          'pct_age25_no_highschool',
+                          'pct_not_working_age',
+                          'per_capita_income',
+                          'hardship_index']
+
+        for f in features_socio:
+            df_socio = df_socio.withColumn(f, df_socio[f].cast(FloatType()))
         return df_socio
+
+    def df_crime_socio(self):
+        """
+
+        :return:
+        """
+        df_crime_socio = self.df_crime.join(self.df_socio, ['community_area_number'], "inner")
+        df_crime_socio = df_crime_socio.na.drop()
+        return df_crime_socio
+
 
     def df_nb_crimes(self):
 

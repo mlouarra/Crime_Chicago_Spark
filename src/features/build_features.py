@@ -42,9 +42,6 @@ class extract_features_classification:
         return self._config["List_to_drop"]
 
 
-
-
-
     def duration_day_func(x):
         """
         :return:
