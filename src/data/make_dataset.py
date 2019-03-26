@@ -95,22 +95,19 @@ class LoadDataframe:
             option("mode", "DROPMALFORMED").option("delimiter", ";").load(self.path_crime())
         for old_name, new_name in column_name['DataCrimes'].items():
             df_crimes = df_crimes.withColumnRenamed(old_name, new_name)
+        for f in ['latitude', 'longitude']:
+            df_crimes = df_crimes.withColumn(f, df_crimes[f].cast(FloatType()))
+
         df_crimes = df_crimes.withColumn("date", func.to_timestamp("date", "MM/dd/yyyy hh:mm:ss aaa"))
         df_crimes = df_crimes.filter((func.col('date') > self._start_year) & (func.col('date') < self._end_year))
-
         if self._config["List_of_crimes_prediction"]["with_merge"]:
             df_crimes = df_crimes.na.replace(self._config["List_of_crimes_prediction"]["to_merge"], 'primary_type')
             return df_crimes
-
         else:
-
             return df_crimes
 
     def df_socio(self):
         """
-
-
-
         :return:
         """
         column_name = json.loads(open(self.path_columns()).read())
@@ -136,7 +133,7 @@ class LoadDataframe:
 
         :return:
         """
-        df_crime_socio = self.df_crime.join(self.df_socio, ['community_area_number'], "inner")
+        df_crime_socio = self.df_crime().join(self.df_socio(), ['community_area_number'], "inner")
         df_crime_socio = df_crime_socio.na.drop()
         return df_crime_socio
 
@@ -174,6 +171,7 @@ class LoadDataframe:
             withColumn("day",func.dayofmonth(func.col("datetime"))). \
             withColumn("hour", func.hour(func.col("datetime")))
         df = df.withColumn('Temperature', df['Temperature'].cast(FloatType()))
+        df = df.drop('datetime')
         return df
 
     def df_sky(self):
@@ -190,4 +188,5 @@ class LoadDataframe:
             withColumn("year", func.year(func.col("datetime"))).\
             withColumn("day", func.dayofmonth(func.col("datetime"))). \
             withColumn("hour", func.hour(func.col("datetime")))
+        df = df.drop('datetime')
         return df
