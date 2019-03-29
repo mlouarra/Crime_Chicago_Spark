@@ -1,12 +1,7 @@
-import xgboost as xgb
-from sklearn import svm
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from pyspark.ml.feature import StandardScaler, VectorAssembler, VectorIndexer, StandardScaler
-from sklearn.model_selection import RandomizedSearchCV
+from pyspark.ml.feature import StandardScaler, VectorAssembler, VectorIndexer, StandardScaler, OneHotEncoderEstimator, StringIndexer, IndexToString
 from pyspark.ml.regression import GBTRegressor
 from pyspark.ml import Pipeline
-
+from pyspark.ml.classification import RandomForestClassifier, RandomForestClassificationModel, GBTClassifier,OneVsRest, OneVsRestModel
 
 class model_classification:
 
@@ -19,95 +14,86 @@ class model_classification:
         self._config = config
         self._df_ml = df_ml
 
-    def set_param(self):
 
-        return self._config['Xgboost_param_classification']
 
-    def load_for_ml(self):
+    def train_model(self):
+        from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+        from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
 
         """
 
         :param :
         :return: list of dataframes for machine learning
         """
-        pd.options.mode.chained_assignment = None
+        rf = RandomForestClassifier(labelCol='label', featuresCol='features')
+        categoricalColumns = ['domestic']
+        numericCols = ['year', 'month', 'day', 'hour', 'minute', 'latitude',
+                       'longitude', 'isStreet', 'isAV',
+                       'isBLVD', 'isRD', 'isPL', 'isBROADWAY',
+                       'isPKWY', 'duree_day', 'minute', 'dayofmonth',
+                       'dayofyear', 'dayofweek', 'Temperature',
+                       'pct_housing_crowded',
+                       'pct_households_below_poverty',
+                       'pct_age16_unemployed',
+                       'pct_age25_no_highschool',
+                       'pct_not_working_age',
+                       'per_capita_income',
+                       'hardship_index',
+                       'Chicago_broken clouds',
+                       'Chicago_drizzle',
+                       'Chicago_few clouds',
+                       'Chicago_fog',
+                       'Chicago_haze',
+                       'Chicago_heavy intensity drizzle',
+                       'Chicago_heavy intensity rain',
+                       'Chicago_heavy snow',
+                       'Chicago_light intensity drizzle',
+                       'Chicago_light rain',
+                       'Chicago_light rain and snow',
+                       'Chicago_light snow',
+                       'Chicago_mist',
+                       'Chicago_moderate rain',
+                       'Chicago_overcast clouds',
+                       'Chicago_proximity thunderstorm',
+                       'Chicago_scattered clouds',
+                       'Chicago_sky is clear',
+                       'Chicago_snow',
+                       'Chicago_thunderstorm',
+                       'Chicago_thunderstorm with heavy rain',
+                       'Chicago_thunderstorm with light rain',
+                       'Chicago_thunderstorm with rain',
+                       'Chicago_very heavy rain'
+                       ]
+        df_train, df_test = self._df_ml.randomSplit([0.7, 0.3])
+        stages = []
+        stringIndexer_label = StringIndexer(inputCol='primary_type', outputCol='label').fit(df_train)
+        labelConverter = IndexToString(inputCol="prediction", outputCol="predictedLabel",
+                                       labels=stringIndexer_label.labels)
+        for categoricalCol in categoricalColumns:
+            stringIndexer = StringIndexer(inputCol=categoricalCol, outputCol=categoricalCol + 'Index')
+            encoder = OneHotEncoderEstimator(inputCols=[stringIndexer.getOutputCol()],
+                                             outputCols=[categoricalCol + "classVec"])
+            stages.append(stringIndexer)
+            stages.append(encoder)
 
-        if len(self._config['delete_features']) != 0:
-            df_ml = self._df_ml[0].drop(columns=self._config['delete_features'])
-        else:
-            df_ml = self._df_ml[0]
-        class_name = self._df_ml[1]
-        feature_cols = [x for x in df_ml if x != 'Category']
-        X = df_ml[feature_cols]
-        y = df_ml['Category']
-        X_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        return X_train, x_test, y_train, y_test, class_name
+        stages.append(stringIndexer_label)
+        assemblerInputs = [c + "classVec" for c in categoricalColumns] + numericCols
+        assembler = VectorAssembler(inputCols=assemblerInputs, outputCol="features")
+        stages.append(assembler)
+        stages.append(rf)
+        stages.append(labelConverter)
+        pipeline_and_model = Pipeline(stages=stages)
+        paramGrid = (ParamGridBuilder().addGrid(rf.numTrees, [50, 60])
+                     .addGrid(rf.maxDepth, [5, 8])
+                     .build())
 
-    def dtrain(self):
-        """
-
-        :return:
-        """
-        X_train = self.load_for_ml()[0]
-        y_train = self.load_for_ml()[2]
-        return xgb.DMatrix(X_train, label=y_train)
-
-
-    def dtest(self):
-        """
-
-        :return:
-        """
-        x_test = self.load_for_ml()[1]
-        # y_test = self.load_for_ml()[3]
-        return xgb.DMatrix(x_test)
-
-    def train_xgboost_(self, params):
-        """
-
-        :param df_crime_socio:
-        :return:
-        """
-        X_train = self.load_for_ml()[0]
-        y_train = self.load_for_ml()[2]
-        xgb_clas = xgb.XGBClassifier()
-        gs = RandomizedSearchCV(xgb_clas, params, n_jobs=1, n_iter=5, cv=5)
-        gs.fit(X_train, y_train)
-        return gs.best_estimator_
-
-    def train_xgboost(self):
-        """
-
-        :param df_crime_socio:
-        :return:
-        """
-
-        dtrain = self.dtrain()
-        # dtest = self.dtest()
-
-        return self._config['connect']['PathTemperature']
-
-    def path_sky(self):
-
-        return self._config['connect']['PathTemperature']
-
-
-    def train_svm(self):
-        """
-
-        :return:
-        """
-        C = 1.0  # SVM regularization parameter
-        X = self.load_for_ml()[0]
-        y = self.load_for_ml()[2]
-        svc = svm.SVC(kernel='linear', C=C).fit(X, y)
-        return svc
-
-    def train_rf(self, param):
-        """
-
-        :return:
-        """
+        crossval = CrossValidator(estimator=pipeline_and_model,
+                                  estimatorParamMaps=paramGrid,
+                                  evaluator=MulticlassClassificationEvaluator(),
+                                  numFolds=10)
+        cvModel = crossval.fit(df_train)
+        bestPipeline = cvModel.bestModel
+        return bestPipeline
 
 class model_regression:
 
