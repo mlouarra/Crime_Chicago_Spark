@@ -1,12 +1,11 @@
 import os
 import sys
 from yaml import load as yaml_load
-from bokeh.application.handlers import FunctionHandler
-from bokeh.application import Application
+from pyspark.sql import SparkSession
 from src.data.make_dataset import LoadDataframe
-from src.visualization.visualize import Visu
-from tornado.ioloop import IOLoop
-from bokeh.server.server import Server
+from src.features.build_features import extract_features_classification
+from src.models.train_model import model_classification
+
 
 def _load_config_file(config_file):
     """
@@ -46,19 +45,37 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     # Load configuration from YAML file
     # build configuration
     config = _build_configuration(config_file)
-    obj_df_loaded = LoadDataframe(config, '2001', '2017')
-    df_merged = obj_df_loaded.df_merged()
-    obj_visu = Visu(config, df_merged)
-    io_loop = IOLoop.current()
-    bokeh_app = Application(FunctionHandler(obj_visu.modify_doc))
-    server = Server({"/": bokeh_app}, io_loop=io_loop)
-    server.start()
-    print("Opening Bokeh application on http://localhost:5006/")
-    io_loop.add_callback(server.show, "/")
-    io_loop.start()
+    obj_df_loaded = LoadDataframe(config, '2013', '2014')
+    df_crimes_socio = obj_df_loaded.df_crime_socio()
+    df_temp = obj_df_loaded.df_temperature()
+    df_sky = obj_df_loaded.df_sky()
+    obj_extract_features_classification = extract_features_classification(config, df_crimes_socio, df_temp, df_sky)
+    df_ml = obj_extract_features_classification.extract_feature()
+    obj_model_classification = model_classification(config, df_ml)
+    rf_model = obj_model_classification.train_RF()
+    df_test = obj_model_classification.df_test()
+    df_prediction = rf_model.transform(df_test)
+    print(df_prediction.select('primary_type', 'label', 'prediction', 'predictedLabel').limit(10).toPandas())
+
 
 if __name__ == "__main__":
+    spark = SparkSession \
+        .builder \
+        .appName('classification_model') \
+        .getOrCreate()
+
+    print('Session created')
+
     if len(sys.argv) != 1:
         main(sys.argv[1])
     else:
         main()
+        spark.stop()
+
+
+
+
+
+
+
+

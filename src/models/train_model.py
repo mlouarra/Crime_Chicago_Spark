@@ -13,18 +13,23 @@ class model_classification:
         """
         self._config = config
         self._df_ml = df_ml
+        self._df_train, self._df_test = self._df_ml.randomSplit([0.8, 0.2])
 
 
+    def df_train(self):
+        return self._df_train
 
-    def train_model(self):
+    def df_test(self):
+        return self._df_test
+
+
+    def train_RF(self):
+        """
+
+        :return:
+        """
         from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
         from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
-
-        """
-
-        :param :
-        :return: list of dataframes for machine learning
-        """
         rf = RandomForestClassifier(labelCol='label', featuresCol='features')
         categoricalColumns = ['domestic']
         numericCols = ['year', 'month', 'day', 'hour', 'minute', 'latitude',
@@ -64,9 +69,9 @@ class model_classification:
                        'Chicago_thunderstorm with rain',
                        'Chicago_very heavy rain'
                        ]
-        df_train, df_test = self._df_ml.randomSplit([0.7, 0.3])
+
         stages = []
-        stringIndexer_label = StringIndexer(inputCol='primary_type', outputCol='label').fit(df_train)
+        stringIndexer_label = StringIndexer(inputCol='primary_type', outputCol='label').fit(self.df_train())
         labelConverter = IndexToString(inputCol="prediction", outputCol="predictedLabel",
                                        labels=stringIndexer_label.labels)
         for categoricalCol in categoricalColumns:
@@ -91,7 +96,7 @@ class model_classification:
                                   estimatorParamMaps=paramGrid,
                                   evaluator=MulticlassClassificationEvaluator(),
                                   numFolds=10)
-        cvModel = crossval.fit(df_train)
+        cvModel = crossval.fit(self.df_train())
         bestPipeline = cvModel.bestModel
         return bestPipeline
 

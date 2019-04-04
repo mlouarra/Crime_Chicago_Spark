@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import json
-
-import findspark
-findspark.init()
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as func
 from pyspark.sql.types import FloatType

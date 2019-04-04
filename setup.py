@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='src',
+    name='ClassificationModel',
     packages=find_packages(),
     version='0.1.0',
     description='Prediction of crimes in Chicago',
