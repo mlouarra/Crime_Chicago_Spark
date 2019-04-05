@@ -35,6 +35,7 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     Script entry point function
     """
     # Check if configuration file parameter is set and if the file exists
+    from pyspark.ml.classification import RandomForestClassifier, RandomForestClassificationModel
     if not config_file:
         print('Configuration file is mandatory, abort')
         sys.exit(1)
@@ -53,9 +54,16 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     df_ml = obj_extract_features_classification.extract_feature()
     obj_model_classification = model_classification(config, df_ml)
     rf_model = obj_model_classification.train_RF()
+    rfPath = "/home/ml/Documents/Crime_Chigaco_Spark/models//rfModel"
+    rf_model.save(rfPath)
+    # sameRFModel = RandomForestClassificationModel.load(rfPath)
     df_test = obj_model_classification.df_test()
     df_prediction = rf_model.transform(df_test)
+
     print(df_prediction.select('primary_type', 'label', 'prediction', 'predictedLabel').limit(10).toPandas())
+    print('write results in csv')
+    df_prediction.toPandas().to_csv('/home/ml/Documents/Crime_Chigaco_Spark/reports/result_pred.csv', header=True)
+
 
 
 if __name__ == "__main__":
