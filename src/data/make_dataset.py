@@ -8,16 +8,18 @@ spark = SparkSession.builder.master("local").appName("Data cleaning").getOrCreat
 pd.options.mode.chained_assignment = None
 
 class LoadDataframe:
-
     """
-
+    This class loads csv files
     """
 
     def __init__(self, config, start_year, end_year):
         """
 
-        :param config:
+        :param config: dict for configuration
+        :param start_year: string or integer
+        :param end_year: string or integer
         """
+
         self._config = config
         self._start_year = pd.to_datetime(str(start_year))
         self._end_year = pd.to_datetime(str(end_year))
@@ -26,28 +28,28 @@ class LoadDataframe:
     def path_crime(self):
         """
 
-        :return:
+        :return: return the path of csv crimes of chicago
         """
         return self._config['connect']['PathCrimes']
 
     def path_socio(self):
         """
 
-        :return:
+        :return: return the path of csv socio-economic
         """
         return self._config['connect']['PathSocioEco']
 
     def path_columns(self):
         """
 
-        :return:
+        :return: the path of json file,
         """
         return self._config['connect']['Pathcolumns']
 
     def path_temperature(self):
         """
 
-        :return:
+        :return:  the path of temperature csv file
         """
 
         return self._config['connect']['PathTemperature']
@@ -55,13 +57,17 @@ class LoadDataframe:
     def path_sky(self):
         """
 
-        :return:
+        :return:  the path of weather description  csv file
         """
         return self._config['connect']['PathSky']
 
     def get_dummies(self, df, list_columns):
         """
+        Convert categorical variable into dummy/indicator variables
 
+        :param df: spark dataframe
+        :param list_columns: list of columns in dataframe to be transformed into zero
+        :return: dummy spark dataframe
         """
 
         def join_all(dfs, keys):
@@ -84,8 +90,8 @@ class LoadDataframe:
         return df_result
 
     def df_crime(self):
-        """
-        :return:
+        """ return datataframe of crimes, we rename columns
+        :return: spark dataframe
         """
         column_name = json.loads(open(self.path_columns()).read())
         df_crimes = spark.read.format("csv").option("header", "true"). \
@@ -104,8 +110,8 @@ class LoadDataframe:
             return df_crimes
 
     def df_socio(self):
-        """
-        :return:
+        """ return socio-economic dataframe
+        :return: spark dataframe
         """
         column_name = json.loads(open(self.path_columns()).read())
         df_socio = spark.read.format("csv").option("header", "true"). \
@@ -126,9 +132,9 @@ class LoadDataframe:
         return df_socio
 
     def df_crime_socio(self):
-        """
+        """ retun dataframe marged between crimes dataframe and socio-economique
 
-        :return:
+        :return: spark dataframe
         """
         df_crime_socio = self.df_crime().join(self.df_socio(), ['community_area_number'], "inner")
         df_crime_socio = df_crime_socio.na.drop()
@@ -137,10 +143,9 @@ class LoadDataframe:
 
     def df_nb_crimes(self):
 
-        """
+        """ return dataframe with number of crimes by type of crimes and by region and month
 
-
-
+        :return: spark dataframe
         """
         df_S = self.df_socio()
         df_C = self.df_crime()
@@ -155,8 +160,8 @@ class LoadDataframe:
 
     def df_temperature(self):
 
-        """
-        :return:
+        """ Loads dataframe temperature and extract year, day, hour, mounth
+        :return: spark dataframe
         """
 
         df = spark.read.format("csv").option("header", "true"). \
@@ -172,18 +177,24 @@ class LoadDataframe:
         return df
 
     def df_sky(self):
-        """
-        :return:
+        """ lodas  dataframe weather description from csv file
+        :return:  spark dataframe
         """
 
         df = spark.read.format("csv").option("header", "true"). \
-            option("mode", "DROPMALFORMED").option("delimiter", ",").load(self.path_sky())
+                option("mode", "DROPMALFORMED").option("delimiter", ",").load(self.path_sky())
+        df = df.na.drop()
         df = df.select('Chicago', 'datetime')
-        df = df.filter((func.col('datetime') >  self._start_year) & (func.col('datetime') < self._end_year))
+        sky_unique_values =  list(df.select('Chicago').distinct().toPandas()['Chicago'])
+        df = df.filter((func.col('datetime') > self._start_year) & (func.col('datetime') < self._end_year))
+        for k in sky_unique_values:
+            if k not in list(df.select('Chicago').distinct().toPandas()['Chicago']):
+                df = df.withColumn("Chicago_" + k, func.lit(-999))
         df = self.get_dummies(df, list_columns=['Chicago'])
         df = df.withColumn("month", func.month(func.col("datetime"))). \
             withColumn("year", func.year(func.col("datetime"))).\
             withColumn("day", func.dayofmonth(func.col("datetime"))). \
             withColumn("hour", func.hour(func.col("datetime")))
+
         df = df.drop('datetime')
         return df

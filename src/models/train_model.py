@@ -1,19 +1,19 @@
-from pyspark.ml.feature import StandardScaler, VectorAssembler, VectorIndexer, StandardScaler, OneHotEncoderEstimator, StringIndexer, IndexToString
+from pyspark.ml.feature import VectorAssembler, StandardScaler, OneHotEncoderEstimator, StringIndexer, IndexToString
 from pyspark.ml.regression import GBTRegressor
 from pyspark.ml import Pipeline
-from pyspark.ml.classification import RandomForestClassifier, RandomForestClassificationModel, GBTClassifier,OneVsRest, OneVsRestModel
+from pyspark.ml.classification import RandomForestClassifier
 
 class model_classification:
 
     def __init__(self, config, df_ml):
         """
 
-        :param config:
+        :param config: dict for configuration
         :param df_crime_socio:
         """
         self._config = config
         self._df_ml = df_ml
-        self._df_train, self._df_test = self._df_ml.randomSplit([0.8, 0.2])
+        self._df_train, self._df_test = self._df_ml.randomSplit([0.9, 0.1])
 
 
     def df_train(self):
@@ -26,10 +26,10 @@ class model_classification:
     def train_RF(self):
         """
 
-        :return:
+        :return: the best model after cross validation and
         """
         from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
-        from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
+        from pyspark.ml.evaluation import MulticlassClassificationEvaluator
         rf = RandomForestClassifier(labelCol='label', featuresCol='features')
         categoricalColumns = ['domestic']
         numericCols = ['year', 'month', 'day', 'hour', 'minute', 'latitude',
@@ -116,7 +116,7 @@ class model_regression:
 
         """
 
-        :return:
+        :return: model of prediction number of crime by type and region (regression)
         """
         features = self._df_ml.columns
         features.remove('label')

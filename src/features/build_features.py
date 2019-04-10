@@ -5,16 +5,16 @@ import re
 
 class extract_features_classification:
     """
-
+    This class extract features for machine learning algorithm
     """
 
     def __init__(self, config, df_crime_socio, df_temperature, df_sky):
         """
 
-        :param config:
-        :param df_crime_socio:
-        :param df_temperature:
-        :param df_sky:
+        :param config: dict for configuration
+        :param df_crime_socio: dataframe from LoadDataframe class, method df_crime_socio
+        :param df_temperature: dataframe from LoadDataframe class, method df_temperature
+        :param df_sky: dataframe from LoadDataframe class method df_sky
         """
         self._config = config
         self._df_crime_socio = df_crime_socio
@@ -25,7 +25,7 @@ class extract_features_classification:
     def list_of_crimes(self):
         """
 
-        :return:
+        :return: list of crimes that we want to predict
         """
         return self._config["List_of_crimes_prediction"]["with_merge_pred"] \
             if self._config["List_of_crimes_prediction"]["with_merge"] else \
@@ -34,11 +34,9 @@ class extract_features_classification:
     def list_to_drop(self):
         """
 
-        :return:
+        :return: list of crimes that we want to drop from dataframe of crimes
         """
         return self._config["List_to_drop"]
-
-
 
 
     def extract_feature(self):
@@ -48,7 +46,7 @@ class extract_features_classification:
 
         def duration_day_func(x):
             """
-            :return:
+            :return: duration of day (difference with sunset and sunrise in seconds)
             """
             from astral import Astral
             city_name = 'Chicago'
@@ -96,14 +94,13 @@ class extract_features_classification:
         return df_total
 
 
-
 class  extract_features_regression():
 
     def __init__(self, config, df_nb_crimes):
         """
 
-        :param config:
-        :param df_nb_crimes:
+        :param config: dict for configuration
+        :param df_nb_crimes: LoadDataframe class, method df_nb_crimes
         """
         self._config = config
         self._df_nb_crimes = df_nb_crimes
@@ -111,7 +108,7 @@ class  extract_features_regression():
     def extract_feature(self):
         """
 
-        :return:
+        :return: dataframe features for machine learning regession to predict number crime by region and month
         """
 
         df_ml = self._df_nb_crimes.drop(*['community_area_number', 'month', 'year',

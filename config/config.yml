@@ -17,19 +17,6 @@ List_of_crimes_prediction:
     BATTERY: "ASSAULT_BATTERY"
   with_merge_pred: ["THEFT_ROBBERY_BURGLARY", "ASSAULT_BATTERY", "NARCOTICS"]
 
-Mycolor:
-  Color_1: ['#a6cee3', '#1f78b4', '#b2df8a', '#a6cee3', '#1f78b4', '#b2df8a',
-  '#33a02c', '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99','#a6cee3',
-  '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c','#a6cee3', '#1f78b4',
-  '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c','#fdbf6f', '#a6cee3', '#1f78b4',
-  '#b2df8a', '#33a02c', '#fb9a99','#e31a1c', '#fdbf6f', '#ff7f00', '#a6cee3',
-  '#1f78b4', '#b2df8a','#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00',
-  '#cab2d6','#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
-  '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#a6cee3', '#1f78b4','#b2df8a',
-  '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00','#cab2d6', '#6a3d9a',
-  '#ffff99', '#a6cee3', '#1f78b4', '#b2df8a','#33a02c', '#fb9a99', '#e31a1c',
-  '#fdbf6f', '#ff7f00', '#cab2d6','#6a3d9a', '#ffff99', '#b15928']
-
 NameArea: ['Albany Park',
   'Archer Heights',
   'Armour Square',
@@ -188,35 +175,5 @@ List_to_drop: ['id',
                'fbi_code',
                 'year']
 
-Xgboost_param_classification:
-  objective: 'multi:softmax'
-  eta: 0.08
-  silent: 0
-  nthread: 4
-  num_class: 6
-  eval_metric: 'mlogloss'
-  n_estimators:
-    st.randint(100, 200)
-  max_depth:
-    st.randint(5,20)
-  min_child_weight: 1
-  gamma: 10
-  reg_alfa: 0.1
-  subsample: 0.8
-  colsample_bytree: 1
-  max_delta_step: 1
-
-Xgboost_param_regression:
-  learning_rate: 0.9
-  alpha: 10
-  gamma: 0.5
-  n_estimators: 600
-  eta: 0.1
-  seed: 0
-  subsample: 0.8
-  colsample_bytree: 0.8
-  objective: 'reg:linear'
-  max_depth: 20
-  min_child_weight: 1
 
 delete_features: []

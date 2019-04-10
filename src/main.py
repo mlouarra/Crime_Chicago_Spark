@@ -65,7 +65,6 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     df_prediction.toPandas().to_csv('/home/ml/Documents/Crime_Chigaco_Spark/reports/result_pred.csv', header=True)
 
 
-
 if __name__ == "__main__":
     spark = SparkSession \
         .builder \
