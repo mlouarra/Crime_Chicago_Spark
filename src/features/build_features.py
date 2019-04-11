@@ -4,11 +4,13 @@ import pyspark.sql.functions as func
 import re
 
 class extract_features_classification:
+
     """
     This class extract features for machine learning algorithm
     """
 
     def __init__(self, config, df_crime_socio, df_temperature, df_sky):
+
         """
 
         :param config: dict for configuration
@@ -23,6 +25,7 @@ class extract_features_classification:
 
 
     def list_of_crimes(self):
+
         """
 
         :return: list of crimes that we want to predict
@@ -32,6 +35,7 @@ class extract_features_classification:
             self._config["List_of_crimes_prediction"]["without_merged_pred"]
 
     def list_to_drop(self):
+
         """
 
         :return: list of crimes that we want to drop from dataframe of crimes
@@ -40,11 +44,14 @@ class extract_features_classification:
 
 
     def extract_feature(self):
+
         """
         this function extract features for machine learning algorithm
+
         """
 
         def duration_day_func(x):
+
             """
             :return: duration of day (difference with sunset and sunrise in seconds)
             """
@@ -96,7 +103,12 @@ class extract_features_classification:
 
 class  extract_features_regression():
 
+    """
+
+    """
+
     def __init__(self, config, df_nb_crimes):
+
         """
 
         :param config: dict for configuration
@@ -106,6 +118,7 @@ class  extract_features_regression():
         self._df_nb_crimes = df_nb_crimes
 
     def extract_feature(self):
+
         """
 
         :return: dataframe features for machine learning regession to predict number crime by region and month

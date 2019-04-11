@@ -3,6 +3,7 @@ from pyspark.ml.regression import GBTRegressor
 from pyspark.ml import Pipeline
 from pyspark.ml.classification import RandomForestClassifier
 
+
 class model_classification:
 
     def __init__(self, config, df_ml):
@@ -15,13 +16,11 @@ class model_classification:
         self._df_ml = df_ml
         self._df_train, self._df_test = self._df_ml.randomSplit([0.9, 0.1])
 
-
     def df_train(self):
         return self._df_train
 
     def df_test(self):
         return self._df_test
-
 
     def train_RF(self):
         """
@@ -32,44 +31,11 @@ class model_classification:
         from pyspark.ml.evaluation import MulticlassClassificationEvaluator
         rf = RandomForestClassifier(labelCol='label', featuresCol='features')
         categoricalColumns = ['domestic']
-        numericCols = ['year', 'month', 'day', 'hour', 'minute', 'latitude',
-                       'longitude', 'isStreet', 'isAV',
-                       'isBLVD', 'isRD', 'isPL', 'isBROADWAY',
-                       'isPKWY', 'duree_day', 'minute', 'dayofmonth',
-                       'dayofyear', 'dayofweek', 'Temperature',
-                       'pct_housing_crowded',
-                       'pct_households_below_poverty',
-                       'pct_age16_unemployed',
-                       'pct_age25_no_highschool',
-                       'pct_not_working_age',
-                       'per_capita_income',
-                       'hardship_index',
-                       'Chicago_broken clouds',
-                       'Chicago_drizzle',
-                       'Chicago_few clouds',
-                       'Chicago_fog',
-                       'Chicago_haze',
-                       'Chicago_heavy intensity drizzle',
-                       'Chicago_heavy intensity rain',
-                       'Chicago_heavy snow',
-                       'Chicago_light intensity drizzle',
-                       'Chicago_light rain',
-                       'Chicago_light rain and snow',
-                       'Chicago_light snow',
-                       'Chicago_mist',
-                       'Chicago_moderate rain',
-                       'Chicago_overcast clouds',
-                       'Chicago_proximity thunderstorm',
-                       'Chicago_scattered clouds',
-                       'Chicago_sky is clear',
-                       'Chicago_snow',
-                       'Chicago_thunderstorm',
-                       'Chicago_thunderstorm with heavy rain',
-                       'Chicago_thunderstorm with light rain',
-                       'Chicago_thunderstorm with rain',
-                       'Chicago_very heavy rain'
-                       ]
-
+        numericCols = [item[0] for item in self._df_ml.dtypes if
+                       (item[1].startswith('int') or
+                        item[1].startswith('float') or
+                        item[1].startswith('bigint') or
+                        item[1].startswith('double'))]
         stages = []
         stringIndexer_label = StringIndexer(inputCol='primary_type', outputCol='label').fit(self.df_train())
         labelConverter = IndexToString(inputCol="prediction", outputCol="predictedLabel",
@@ -100,6 +66,7 @@ class model_classification:
         bestPipeline = cvModel.bestModel
         return bestPipeline
 
+
 class model_regression:
 
     def __init__(self, config, df_ml):
@@ -111,9 +78,7 @@ class model_regression:
         self._config = config
         self._df_ml = df_ml
 
-
     def train_model(self):
-
         """
 
         :return: model of prediction number of crime by type and region (regression)
@@ -127,7 +92,3 @@ class model_regression:
         pipeline = Pipeline(stages=stages)
         model = pipeline.fit(self._df_ml)
         return model
-
-
-
-

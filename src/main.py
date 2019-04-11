@@ -53,6 +53,7 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     obj_extract_features_classification = extract_features_classification(config, df_crimes_socio, df_temp, df_sky)
     df_ml = obj_extract_features_classification.extract_feature()
     obj_model_classification = model_classification(config, df_ml)
+
     rf_model = obj_model_classification.train_RF()
     rfPath = "/home/ml/Documents/Crime_Chigaco_Spark/models//rfModel"
     rf_model.save(rfPath)
