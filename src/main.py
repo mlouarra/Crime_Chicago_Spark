@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from src.data.make_dataset import LoadDataframe
 from src.features.build_features import extract_features_classification
 from src.models.train_model import model_classification
-
+from src.models.predict_model import predict_model
 
 def _load_config_file(config_file):
     """
@@ -30,7 +30,7 @@ def _build_configuration(config_file):
     return config
 
 
-def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
+def main(config_file='/home/ml/Documents/Crime_Chigaco_Spark/config/config.yml'):
     """
     Script entry point function
     """
@@ -46,24 +46,31 @@ def main(config_file='/home/ml/Documents/crimes_chigaco/config/config.yml'):
     # Load configuration from YAML file
     # build configuration
     config = _build_configuration(config_file)
-    obj_df_loaded = LoadDataframe(config, '2013', '2014')
-    df_crimes_socio = obj_df_loaded.df_crime_socio()
-    df_temp = obj_df_loaded.df_temperature()
-    df_sky = obj_df_loaded.df_sky()
-    obj_extract_features_classification = extract_features_classification(config, df_crimes_socio, df_temp, df_sky)
-    df_ml = obj_extract_features_classification.extract_feature()
-    obj_model_classification = model_classification(config, df_ml)
+    if config['model_ML_classification']['train_mode']['train']:
+        start_date_train = config['model_ML_classification']['train_mode']['start_date']
+        end_date_train = config['model_ML_classification']['train_mode']['end_date']
+        obj_df_loaded = LoadDataframe(config, start_date_train, end_date_train)
+        df_crimes_socio = obj_df_loaded.df_crime_socio()
+        df_temp = obj_df_loaded.df_temperature()
+        df_sky = obj_df_loaded.df_sky()
+        obj_extract_features_classification = extract_features_classification(config, df_crimes_socio, df_temp, df_sky)
+        df_ml = obj_extract_features_classification.extract_feature()
+        obj_model_classification = model_classification(config, df_ml)
+        rf_model = obj_model_classification.train_RF()
+        rfPath = config['model_ML_classification']['path']['path_model_rf']
+        rf_model.save(rfPath)
 
-    rf_model = obj_model_classification.train_RF()
-    rfPath = "/home/ml/Documents/Crime_Chigaco_Spark/models//rfModel"
-    rf_model.save(rfPath)
-    # sameRFModel = RandomForestClassificationModel.load(rfPath)
-    df_test = obj_model_classification.df_test()
-    df_prediction = rf_model.transform(df_test)
-
-    print(df_prediction.select('primary_type', 'label', 'prediction', 'predictedLabel').limit(10).toPandas())
-    print('write results in csv')
-    df_prediction.toPandas().to_csv('/home/ml/Documents/Crime_Chigaco_Spark/reports/result_pred.csv', header=True)
+    if config['model_ML_classification']['predict_mode']['predict']:
+        start_date_train = config['model_ML_classification']['predict_mode']['start_date']
+        end_date_train = config['model_ML_classification']['predict_mode']['end_date']
+        obj_df_loaded = LoadDataframe(config, start_date_train, end_date_train)
+        df_crimes_socio = obj_df_loaded.df_crime_socio()
+        df_temp = obj_df_loaded.df_temperature()
+        df_sky = obj_df_loaded.df_sky()
+        obj_extract_features_classification = extract_features_classification(config, df_crimes_socio, df_temp, df_sky)
+        df_ml = obj_extract_features_classification.extract_feature()
+        obj_predict_model = predict_model(config, df_ml)
+        obj_predict_model.predict_classification()
 
 
 if __name__ == "__main__":

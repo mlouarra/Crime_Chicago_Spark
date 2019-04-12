@@ -54,8 +54,8 @@ class model_classification:
         stages.append(rf)
         stages.append(labelConverter)
         pipeline_and_model = Pipeline(stages=stages)
-        paramGrid = (ParamGridBuilder().addGrid(rf.numTrees, [50, 60])
-                     .addGrid(rf.maxDepth, [5, 8])
+        paramGrid = (ParamGridBuilder().addGrid(rf.numTrees, self._config['model_ML_classification']['param']['numTrees'])
+                     .addGrid(rf.maxDepth, self._config['model_ML_classification']['param']['maxDepth'])
                      .build())
 
         crossval = CrossValidator(estimator=pipeline_and_model,
