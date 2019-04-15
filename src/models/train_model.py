@@ -78,7 +78,7 @@ class model_regression:
         self._config = config
         self._df_ml = df_ml
 
-    def train_model(self):
+    def train_gbt(self):
         """
 
         :return: model of prediction number of crime by type and region (regression)

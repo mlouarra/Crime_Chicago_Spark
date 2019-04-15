@@ -54,4 +54,47 @@ Project Organization
 
 --------
 
+Configuration of Project Environment
+*************************************
+
+The aim of this script is to generate features for machine learning project.
+
+Overview on How to Run this script
+================================
+1. Install anaconda
+2. Create a new environment : conda create --name <name_of_your_env>
+3. Activate the new environment to use it (Linux: source activate <name_of_your_env>)
+4. Install packages required: pip install -r requirements.txt
+5. Execute main.py
+
+
+
+Setup procedure
+================
+
+A. Configure yaml file
+--------------------------------------------------------------------------------------------------------------------------------------
+======================================================================================================================================
+This section concerns the extraction of features.
+
+We will explain:
+
+- the role of the different fields
+- the values that each field can contain
+
+An example of a configuration file is shown below.
+======================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>

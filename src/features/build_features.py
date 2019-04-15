@@ -6,7 +6,7 @@ import re
 class extract_features_classification:
 
     """
-    This class extract features for machine learning algorithm
+    This class extract features for classitication machine learning algorithm
     """
 
     def __init__(self, config, df_crime_socio, df_temperature, df_sky):
@@ -100,11 +100,10 @@ class extract_features_classification:
 
         return df_total
 
-
 class  extract_features_regression():
 
     """
-
+    extract features for regression machine learning algorithm
     """
 
     def __init__(self, config, df_nb_crimes):
