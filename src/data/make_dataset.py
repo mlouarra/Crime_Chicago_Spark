@@ -162,7 +162,7 @@ class LoadDataframe:
         """
         df_S = self.df_socio()
         df_C = self.df_crime()
-        df_C = df_C.filter(func.col('primary_type').isin(self._config['NameCrime']))
+        df_C = df_C.filter(func.col('primary_type').isin(self._config['List_of_crime_regression']))
         df_C = df_C.withColumn("month", func.month(func.col("date"))). \
             withColumn("year", func.year(func.col("date"))). \
             groupBy('community_area_number', 'month', 'year', 'primary_type'). \

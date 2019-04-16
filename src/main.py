@@ -85,7 +85,7 @@ def main(config_file='/home/ml/Documents/Crime_Chigaco_Spark/config/config.yml')
             df_ml = obj_extract_features_regression.extract_feature()
             obj_model_regression = model_regression(config, df_ml)
             regression_model = obj_model_regression.train_gbt()
-            regressionPath = config['model_ML_classification']['path']['path_model_rf']
+            regressionPath = config['model_ML_regression']['path']['path_model_regression']
             regression_model.save(regressionPath)
             # to predict result
         if config['model_ML_regression']['predict_mode']['predict']:

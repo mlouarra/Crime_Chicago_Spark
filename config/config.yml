@@ -17,6 +17,45 @@ List_of_crimes_prediction:
     BATTERY: "ASSAULT_BATTERY"
   with_merge_pred: ["THEFT_ROBBERY_BURGLARY", "ASSAULT_BATTERY", "NARCOTICS"]
 
+
+make_regression: True
+make_classificatin: True
+
+model_ML_classification:
+  train_mode:
+    train: True
+    start_date: 2012
+    end_date: 2013
+  predict_mode:
+    predict: True
+    start_date: 2013
+    end_date: 2014
+  param:
+    numTrees: [20,50]
+    maxDepth: [5, 8]
+    test_size: [0.9, 0.1]
+  path:
+    path_model_rf:  "../models/rfModel"
+    path_results: "../reports/result_pred_classification.csv"
+
+model_ML_regression:
+  train_mode:
+    train: True
+    start_date: 2012
+    end_date: 2013
+  predict_mode:
+    predict: True
+    start_date: 2013
+    end_date: 2014
+  param:
+    maxIter: 100
+    maxDepth: 8
+  path:
+    path_model_regression: "../models/regression_Model"
+    path_results: "../reports/result_pred_regression.csv"
+
+
+
 NameArea: ['Albany Park',
   'Archer Heights',
   'Armour Square',
@@ -174,43 +213,3 @@ List_to_drop: ['id',
                'community_area_name',
                'fbi_code',
                 'year']
-
-delete_features: []
-
-make_regression: True
-make_classificatin: False
-
-model_ML_classification:
-  train_mode:
-    train: True
-    start_date: 2012
-    end_date: 2013
-  predict_mode:
-    predict: True
-    start_date: 2013
-    end_date: 2014
-  param:
-    numTrees: [20,50]
-    maxDepth: [5, 8]
-    test_size: [0.9, 0.1]
-  path:
-    path_model_rf:  "../models/rfModel"
-    path_results: "../reports/result_pred_classification.csv"
-
-model_ML_regression:
-  train_mode:
-    train: True
-    start_date: 2012
-    end_date: 2013
-    predict_mode:
-      predict: True
-      start_date: 2013
-      end_date: 2014
-    param:
-      maxIter: 100
-      maxDepth: 8
-    path:
-      path_model_regression: "../models/regression_Model"
-      path_results: "../reports/result_pred_regression.csv"
-
-
