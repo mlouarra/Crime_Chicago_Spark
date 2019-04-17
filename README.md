@@ -91,72 +91,65 @@ In this section, We will explain:
 - the role of the different fields
 - the values that each field can contain
 
-An example of a configuration file is shown below.
-======================================================================================================================================
 
-connect:
-  PathCrimes: '/home/ml/Documents/Crime_Chigaco_Spark/data/raw/Crimes_-_2001_to_present.csv'
-  PathSocioEco: '/home/ml/Documents/Crime_Chigaco_Spark/data/raw/Census_Data_-_Selected_socioeconomic_indicators_in_Chicago__2008___2012.csv'
-  PathTemperature: '/home/ml/Documents/Crime_Chigaco_Spark/data/raw/temperature.csv'
-  PathSky: '/home/ml/Documents/Crime_Chigaco_Spark/data/raw/weather_description.csv'
-  Pathcolumns: '/home/ml/Documents/Crime_Chigaco_Spark/config/rename_columns.json'
-  PathGeoMapChicago: '/home/ml/Documents/Crime_Chigaco_Spark/data/raw/chicago_police_districts.geojson'
+###### With file configuration, it is possible to merge some crimes between them.
 
 List_of_crimes_prediction:
-  with_merge: True
-  without_merged_pred: ['THEFT', 'BATTERY', 'CRIMINAL DAMAGE', 'NARCOTICS', 'BURGLARY', 'ASSAULT']
+
+    with_merge: False
+    without_merged_pred: ['THEFT', 'BATTERY', 'CRIMINAL DAMAGE', 'NARCOTICS', 'BURGLARY', 'ASSAULT']
+  
   to_merge:
+  
     THEFT: "THEFT_ROBBERY_BURGLARY"
     ROBBERY: "THEFT_ROBBERY_BURGLARY"
     BURGLARY: "THEFT_ROBBERY_BURGLARY"
     ASSAULT: "ASSAULT_BATTERY"
     BATTERY: "ASSAULT_BATTERY"
+    
   with_merge_pred: ["THEFT_ROBBERY_BURGLARY", "ASSAULT_BATTERY", "NARCOTICS"]
-make_regression: True
-make_classificatin: False
+  
+ 
+### Explanation:
+* if the field with_merge is False, the crime to predict is list of without_merged_pred
+* if the field with_merge is True, we merge the crimes (for this configuration)
+   * "THEFT_ROBBERY_BURGLARY" in the same crime
+   * "ASSAULT_BATTERY" in the same crime
+ 
+
+#### with file configuration, we can choose classification or regression algorithm
+
+    make_regression: True
+
+    make_classificatin: True
+   
+#### It is possibile to choose if we want to train model or to use model for predicting
 
 model_ML_classification:
+
   train_mode:
+  
     train: True
     start_date: 2012
     end_date: 2013
+    
   predict_mode:
+  
     predict: True
     start_date: 2013
     end_date: 2014
+    
   param:
+  
     numTrees: [20,50]
     maxDepth: [5, 8]
     test_size: [0.9, 0.1]
+    
   path:
+  
     path_model_rf:  "../models/rfModel"
     path_results: "../reports/result_pred_classification.csv"
 
-model_ML_regression:
-  train_mode:
-    train: True
-    start_date: 2012
-    end_date: 2013
-  predict_mode:
-    predict: True
-    start_date: 2013
-    end_date: 2014
-  param:
-    maxIter: 100
-    maxDepth: 8
-  path:
-    path_model_regression: "../models/regression_Model"
-    path_results: "../reports/result_pred_regression.csv"
+  
 
-
-
-
-
-
-
-
-
-
-
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+ 
