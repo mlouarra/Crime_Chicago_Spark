@@ -1,9 +1,9 @@
-
 from pyspark.ml import PipelineModel
+
 
 class predict_model:
     """
-    this class predicts crimes type and creates a csv file containing the results
+    this class loads model of predicting for classification or regression if the model exists
     """
 
     def __init__(self, config):
@@ -18,14 +18,15 @@ class predict_model:
 
     def predict_classification(self, df_ml_test):
         """
-
-        :return: create csv file with prediction
+        this method loads model and saves results in csv file prediction
+        :param df_ml_test: the dataframe for predicting
+        :return: None
         """
         # load model
-
-        RFModel = PipelineModel.load('../models/rfModel')
+        rf_path = self._config['model_ML_classification']['path']['path_model_rf']
+        rf_model = PipelineModel.load(rf_path)
         # predict from df_ml_test
-        df_prediction = RFModel.transform(df_ml_test)
+        df_prediction = rf_model.transform(df_ml_test)
         # save results
         df_prediction = df_prediction.select('primary_type', 'label', 'prediction', 'predictedLabel')
         print('write results in csv')
@@ -34,17 +35,14 @@ class predict_model:
 
     def predict_regression(self, df_ml_test):
         """
-        This class predicts numbers of crimes by type and region. It creates a csv file containing the results
+        this method loads model and saves csv results for prediction
+        :param df_ml_test: dataframe for predicting
         :return:
         """
-        regression_model = PipelineModel.load("../models/regression_Model")
+        gbt_path = self._config['model_ML_regression']['path']['path_model_regression']
+        regression_model = PipelineModel.load(gbt_path)
         df_prediction = regression_model.transform(df_ml_test)
         # save results
         df_prediction = df_prediction.select('label', 'prediction')
         print('write results in csv')
         df_prediction.toPandas().to_csv(self._config['model_ML_regression']['path']['path_results'])
-
-        pass
-
-
-#

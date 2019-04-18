@@ -111,6 +111,7 @@ List_of_crimes_prediction:
   
  
 ### Explanation:
+
 * if the field with_merge is False, the crime to predict is list of without_merged_pred
 * if the field with_merge is True, we merge the crimes (for this configuration)
    * "THEFT_ROBBERY_BURGLARY" in the same crime
@@ -123,7 +124,7 @@ List_of_crimes_prediction:
 
     make_classificatin: True
    
-#### It is possibile to choose if we want to train model or to use model for predicting
+#### the possibiliy to choose training model or load model for prediting if model exists
 
 model_ML_classification:
 
@@ -149,6 +150,32 @@ model_ML_classification:
   
     path_model_rf:  "../models/rfModel"
     path_results: "../reports/result_pred_classification.csv"
+    
+ 
+model_ML_regression:
+
+  train_mode:
+  
+    train: True
+    start_date: 2012
+    end_date: 2013
+    
+  predict_mode:
+  
+    predict: True
+    start_date: 2013
+    end_date: 2014
+    
+  param:
+  
+    maxIter: 100
+    maxDepth: 8
+    
+  path:
+  
+    path_model_regression: "../models/regression_Model"
+    path_results: "../reports/result_pred_regression.csv"
+
 
   
 

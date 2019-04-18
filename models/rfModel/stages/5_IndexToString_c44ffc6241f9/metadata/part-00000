@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.IndexToString","timestamp":1555579719120,"sparkVersion":"2.4.0","uid":"IndexToString_c44ffc6241f9","paramMap":{"inputCol":"prediction","labels":["THEFT_ROBBERY_BURGLARY","ASSAULT_BATTERY","NARCOTICS"],"outputCol":"predictedLabel"},"defaultParamMap":{"outputCol":"IndexToString_c44ffc6241f9__output"}}

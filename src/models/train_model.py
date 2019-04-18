@@ -5,6 +5,9 @@ from pyspark.ml.classification import RandomForestClassifier
 
 
 class model_classification:
+    """
+    this class train random forest for  classification
+    """
 
     def __init__(self, config, df_ml):
         """
@@ -24,7 +27,7 @@ class model_classification:
 
     def train_RF(self):
         """
-
+        train randofm forest model for classification
         :return: the best model after cross validation and
         """
         from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
@@ -54,9 +57,10 @@ class model_classification:
         stages.append(rf)
         stages.append(labelConverter)
         pipeline_and_model = Pipeline(stages=stages)
-        paramGrid = (ParamGridBuilder().addGrid(rf.numTrees, self._config['model_ML_classification']['param']['numTrees'])
-                     .addGrid(rf.maxDepth, self._config['model_ML_classification']['param']['maxDepth'])
-                     .build())
+        paramGrid = (
+            ParamGridBuilder().addGrid(rf.numTrees, self._config['model_ML_classification']['param']['numTrees'])
+            .addGrid(rf.maxDepth, self._config['model_ML_classification']['param']['maxDepth'])
+            .build())
 
         crossval = CrossValidator(estimator=pipeline_and_model,
                                   estimatorParamMaps=paramGrid,
@@ -68,6 +72,9 @@ class model_classification:
 
 
 class model_regression:
+    """
+    this class train gbt model regression
+    """
 
     def __init__(self, config, df_ml):
         """
